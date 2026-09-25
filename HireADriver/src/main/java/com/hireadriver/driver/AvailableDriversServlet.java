@@ -25,10 +25,14 @@ public class AvailableDriversServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Get existing customer session
         HttpSession session =
                 request.getSession(false);
 
-        // Check customer login
+        // -----------------------------------------
+        // CHECK CUSTOMER LOGIN
+        // -----------------------------------------
+
         if (session == null ||
             session.getAttribute("customerId") == null) {
 
@@ -40,14 +44,18 @@ public class AvailableDriversServlet extends HttpServlet {
             return;
         }
 
-        // Get selected vehicle from customer booking
+        // -----------------------------------------
+        // GET SELECTED VEHICLE
+        // -----------------------------------------
+
         String vehicleType =
                 (String) session.getAttribute(
                     "bookingVehicleType"
                 );
 
+        // If vehicle was not selected
         if (vehicleType == null ||
-            vehicleType.isEmpty()) {
+            vehicleType.trim().isEmpty()) {
 
             response.sendRedirect(
                 request.getContextPath()
@@ -57,23 +65,41 @@ public class AvailableDriversServlet extends HttpServlet {
             return;
         }
 
-
-        /*
-         * Get only registered drivers who:
-         *
-         * 1. Are available
-         * 2. Have the selected vehicle type
-         */
+        // -----------------------------------------
+        // SQL QUERY
+        // -----------------------------------------
+        //
+        // Customer selects:
+        //
+        // Car
+        //
+        // Then we find drivers where:
+        //
+        // active_vehicle = Car
+        // available = TRUE
+        //
+        // -----------------------------------------
 
         String sql =
-                "SELECT driver_id, full_name, phone, "
-              + "email, license_number, vehicle_type, "
-              + "vehicle_number, available "
+                "SELECT "
+              + "driver_id, "
+              + "full_name, "
+              + "phone, "
+              + "email, "
+              + "license_number, "
+              + "vehicle_type, "
+              + "vehicle_number, "
+              + "driver_type, "
+              + "active_vehicle, "
+              + "available "
               + "FROM drivers "
               + "WHERE available = TRUE "
-              + "AND LOWER(vehicle_type) = LOWER(?) "
+              + "AND LOWER(active_vehicle) = LOWER(?) "
               + "ORDER BY driver_id DESC";
 
+        // -----------------------------------------
+        // DATABASE CONNECTION
+        // -----------------------------------------
 
         try (
             Connection connection =
@@ -83,25 +109,36 @@ public class AvailableDriversServlet extends HttpServlet {
                     connection.prepareStatement(sql)
         ) {
 
+            // Set selected vehicle
             statement.setString(
                 1,
-                vehicleType
+                vehicleType.trim()
             );
 
+            // -----------------------------------------
+            // EXECUTE QUERY
+            // -----------------------------------------
 
-            try (ResultSet result =
-                    statement.executeQuery()) {
+            try (
+                ResultSet result =
+                        statement.executeQuery()
+            ) {
 
+                // Send drivers to JSP
                 request.setAttribute(
                     "drivers",
                     result
                 );
 
+                // Send selected vehicle to JSP
                 request.setAttribute(
                     "vehicleType",
                     vehicleType
                 );
 
+                // -----------------------------------------
+                // OPEN AVAILABLE DRIVERS PAGE
+                // -----------------------------------------
 
                 request.getRequestDispatcher(
                     "/driver/available-drivers.jsp"
@@ -111,14 +148,22 @@ public class AvailableDriversServlet extends HttpServlet {
                 );
             }
 
-
         } catch (Exception e) {
 
             e.printStackTrace();
 
+            response.setContentType(
+                "text/html;charset=UTF-8"
+            );
+
             response.getWriter().println(
-                "Unable to load drivers: "
+                "<h2>Unable to load available drivers</h2>"
+            );
+
+            response.getWriter().println(
+                "<p>"
                 + e.getMessage()
+                + "</p>"
             );
         }
     }

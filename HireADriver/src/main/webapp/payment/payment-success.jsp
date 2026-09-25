@@ -443,7 +443,7 @@ body {
 
     <a
         class="btn bookings"
-        href="<%= request.getContextPath() %>/booking/my-bookings.jsp">
+        href="<%= request.getContextPath() %>/booking/my-bookings">
 
         📋 My Bookings
 

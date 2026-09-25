@@ -36,7 +36,7 @@ public class DriverLoginServlet extends HttpServlet {
 
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=driver"
+                + "/log/login-failed.jsp?type=driver"
             );
 
             return;
@@ -56,8 +56,15 @@ public class DriverLoginServlet extends HttpServlet {
                     connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, email.trim());
-            statement.setString(2, phone.trim());
+            statement.setString(
+                1,
+                email.trim()
+            );
+
+            statement.setString(
+                2,
+                phone.trim()
+            );
 
             try (ResultSet result =
                     statement.executeQuery()) {
@@ -113,7 +120,7 @@ public class DriverLoginServlet extends HttpServlet {
                     // Wrong email or phone
                     response.sendRedirect(
                         request.getContextPath()
-                        + "/login-failed.jsp?type=driver"
+                        + "/log/login-failed.jsp?type=driver"
                     );
                 }
             }
@@ -125,7 +132,7 @@ public class DriverLoginServlet extends HttpServlet {
             // Database/server error
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=driver"
+                + "/log/login-failed.jsp?type=driver"
             );
         }
     }

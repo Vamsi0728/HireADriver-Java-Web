@@ -29,12 +29,14 @@ public class CustomerLoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         // Check empty fields
-        if (email == null || email.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
+        if (email == null ||
+            email.trim().isEmpty() ||
+            password == null ||
+            password.trim().isEmpty()) {
 
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=customer"
+                + "/log/login-failed.jsp?type=customer"
             );
 
             return;
@@ -53,8 +55,15 @@ public class CustomerLoginServlet extends HttpServlet {
                     connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, email);
-            statement.setString(2, password);
+            statement.setString(
+                1,
+                email.trim()
+            );
+
+            statement.setString(
+                2,
+                password
+            );
 
             try (ResultSet result =
                     statement.executeQuery()) {
@@ -74,6 +83,7 @@ public class CustomerLoginServlet extends HttpServlet {
                         result.getString("full_name")
                     );
 
+                    // Successful login
                     response.sendRedirect(
                         request.getContextPath()
                         + "/customer/dashboard.jsp"
@@ -81,10 +91,10 @@ public class CustomerLoginServlet extends HttpServlet {
 
                 } else {
 
-                    // Invalid login → Beautiful failed-login UI
+                    // Invalid login
                     response.sendRedirect(
                         request.getContextPath()
-                        + "/login-failed.jsp?type=customer"
+                        + "/log/login-failed.jsp?type=customer"
                     );
                 }
             }
@@ -93,10 +103,10 @@ public class CustomerLoginServlet extends HttpServlet {
 
             e.printStackTrace();
 
-            // Database/server error → Same professional UI
+            // Database/server error
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=customer"
+                + "/log/login-failed.jsp?type=customer"
             );
         }
     }

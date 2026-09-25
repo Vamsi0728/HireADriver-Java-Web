@@ -4,334 +4,705 @@
 
 <%@ page import="java.sql.ResultSet" %>
 
+<%
+    // Get drivers from servlet
+    ResultSet drivers =
+            (ResultSet) request.getAttribute("drivers");
+
+    // Get vehicle selected by customer
+    String vehicleType =
+            (String) request.getAttribute("vehicleType");
+
+    // If data is missing, go back
+    if (drivers == null || vehicleType == null) {
+
+        response.sendRedirect(
+            request.getContextPath()
+            + "/driver-booking/book.jsp"
+        );
+
+        return;
+    }
+%>
+
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
     <meta charset="UTF-8">
 
-    <title>Available Drivers - Hire A Driver</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Available Drivers - Hire A Driver
+    </title>
+
 
     <style>
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
         }
 
+
         body {
-            margin: 0;
             background: #f4f6f9;
+            color: #1e293b;
         }
+
+
+        /* ================= HEADER ================= */
 
         .header {
+
             background: #1e293b;
+
             color: white;
-            padding: 20px 40px;
+
+            padding: 22px;
+
+            text-align: center;
+
         }
 
-        .header h2 {
-            margin: 0;
+
+        .header h1 {
+
+            font-size: 26px;
+
         }
+
+
+        /* ================= CONTAINER ================= */
 
         .container {
-            max-width: 1200px;
+
+            max-width: 950px;
+
             margin: 40px auto;
+
             padding: 20px;
+
         }
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
 
-        .title {
+        .page-title {
+
+            text-align: center;
+
+            margin-bottom: 8px;
+
             color: #1e293b;
-            margin-bottom: 10px;
+
         }
+
 
         .subtitle {
+
+            text-align: center;
+
             color: #64748b;
-            margin-bottom: 25px;
+
+            margin-bottom: 30px;
+
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
+
+        /* ================= VEHICLE ================= */
+
+        .vehicle-badge {
+
+            display: block;
+
+            width: fit-content;
+
+            margin: 0 auto 30px auto;
+
+            background: #dbeafe;
+
+            color: #1d4ed8;
+
+            padding: 10px 20px;
+
+            border-radius: 25px;
+
+            font-weight: bold;
+
         }
 
-        th {
-            background: #1e293b;
-            color: white;
-            padding: 13px;
-            text-align: left;
+
+        /* ================= DRIVER CARD ================= */
+
+        .driver-card {
+
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 25px;
+
+            margin-bottom: 20px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.08);
+
+            border-left: 5px solid #2563eb;
+
+            transition: 0.2s;
+
         }
 
-        td {
-            padding: 13px;
-            border-bottom: 1px solid #e2e8f0;
+
+        .driver-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 8px 22px rgba(0,0,0,0.12);
+
         }
 
-        tr:hover {
+
+        /* ================= DRIVER HEADER ================= */
+
+        .driver-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .driver-name {
+
+            font-size: 23px;
+
+            font-weight: bold;
+
+            color: #1e293b;
+
+        }
+
+
+        .available {
+
+            background: #dcfce7;
+
+            color: #15803d;
+
+            padding: 7px 13px;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* ================= DETAILS ================= */
+
+        .details {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .detail {
+
             background: #f8fafc;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
         }
+
+
+        .detail-label {
+
+            display: block;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .detail-value {
+
+            color: #1e293b;
+
+            font-weight: bold;
+
+            font-size: 15px;
+
+        }
+
+
+        /* ================= SELECT BUTTON ================= */
 
         .select-btn {
-            background: #16a34a;
-            color: white;
+
+            width: 100%;
+
             border: none;
-            padding: 9px 15px;
-            border-radius: 6px;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
             cursor: pointer;
-            font-size: 14px;
+
+            font-size: 16px;
+
             font-weight: bold;
+
         }
+
 
         .select-btn:hover {
-            background: #15803d;
+
+            background: #1d4ed8;
+
         }
 
-        .back-btn {
-            display: inline-block;
-            margin-top: 25px;
-            background: #475569;
-            color: white;
-            text-decoration: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-        }
 
-        .back-btn:hover {
-            background: #334155;
-        }
+        /* ================= EMPTY ================= */
 
         .empty {
+
+            background: white;
+
+            padding: 45px 25px;
+
             text-align: center;
-            padding: 30px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.07);
+
+        }
+
+
+        .empty-icon {
+
+            font-size: 55px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .empty h2 {
+
+            margin-bottom: 10px;
+
+            color: #1e293b;
+
+        }
+
+
+        .empty p {
+
             color: #64748b;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .back-btn {
+
+            display: inline-block;
+
+            text-decoration: none;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 11px 20px;
+
+            border-radius: 7px;
+
+            font-weight: bold;
+
+        }
+
+
+        .back-btn:hover {
+
+            background: #1d4ed8;
+
+        }
+
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 650px) {
+
+            .container {
+
+                margin: 20px auto;
+
+                padding: 15px;
+
+            }
+
+
+            .driver-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+
+            .details {
+
+                grid-template-columns: 1fr;
+
+            }
+
         }
 
     </style>
 
 </head>
 
+
 <body>
 
-    <div class="header">
 
-        <h2>🚗 Hire A Driver</h2>
+<!-- ================= HEADER ================= -->
+
+<div class="header">
+
+    <h1>
+        🚗 Hire A Driver
+    </h1>
+
+</div>
+
+
+<div class="container">
+
+
+    <h1 class="page-title">
+        Available Drivers
+    </h1>
+
+
+    <p class="subtitle">
+        Choose an available driver for your booking
+    </p>
+
+
+    <div class="vehicle-badge">
+
+        🚗 Selected Vehicle:
+        <%= vehicleType %>
 
     </div>
 
 
-    <div class="container">
+<%
 
-        <div class="card">
+    boolean found = false;
 
-            <h2 class="title">Available Drivers</h2>
 
-            <p class="subtitle">
+    while (drivers.next()) {
 
-                Select a registered driver for your booking.
+        found = true;
 
-            </p>
 
+        int driverId =
+                drivers.getInt("driver_id");
 
-            <%
 
-                ResultSet drivers =
-                    (ResultSet) request.getAttribute("drivers");
+        String driverName =
+                drivers.getString("full_name");
 
-                String vehicleType =
-                    (String) request.getAttribute("vehicleType");
 
-            %>
+        String phone =
+                drivers.getString("phone");
 
 
-            <% if (vehicleType != null) { %>
+        String email =
+                drivers.getString("email");
 
-                <p>
-                    <strong>Selected Vehicle:</strong>
-                    <%= vehicleType %>
-                </p>
 
-            <% } %>
+        String licenseNumber =
+                drivers.getString("license_number");
 
 
-            <table>
+        String driverType =
+                drivers.getString("driver_type");
 
-                <tr>
 
-                    <th>Driver ID</th>
+        String activeVehicle =
+                drivers.getString("active_vehicle");
 
-                    <th>Driver Name</th>
 
-                    <th>Phone</th>
+        String vehicleNumber =
+                drivers.getString("vehicle_number");
 
-                    <th>Email</th>
+%>
 
-                    <th>License Number</th>
 
-                    <th>Vehicle Type</th>
+    <!-- ================= DRIVER CARD ================= -->
 
-                    <th>Vehicle Number</th>
+    <div class="driver-card">
 
-                    <th>Action</th>
 
-                </tr>
+        <div class="driver-header">
 
 
-                <%
+            <div class="driver-name">
 
-                    if (drivers != null) {
+                👤 <%= driverName %>
 
-                        boolean hasDrivers = false;
+            </div>
 
-                        while (drivers.next()) {
 
-                            hasDrivers = true;
+            <div class="available">
 
-                %>
+                🟢 Available
 
+            </div>
 
-                <tr>
-
-                    <td>
-                        <%= drivers.getInt("driver_id") %>
-                    </td>
-
-
-                    <td>
-                        👤 <%= drivers.getString("full_name") %>
-                    </td>
-
-
-                    <td>
-                        <%= drivers.getString("phone") %>
-                    </td>
-
-
-                    <td>
-                        <%= drivers.getString("email") != null
-                            ? drivers.getString("email")
-                            : "-" %>
-                    </td>
-
-
-                    <td>
-                        <%= drivers.getString("license_number") != null
-                            ? drivers.getString("license_number")
-                            : "-" %>
-                    </td>
-
-
-                    <td>
-                        🚗 <%= drivers.getString("vehicle_type") %>
-                    </td>
-
-
-                    <td>
-                        <%= drivers.getString("vehicle_number") != null
-                            ? drivers.getString("vehicle_number")
-                            : "-" %>
-                    </td>
-
-
-                    <td>
-
-                        <form
-                            action="<%= request.getContextPath() %>/driver-booking/select"
-                            method="post"
-                            style="margin:0;">
-
-                            <input
-                                type="hidden"
-                                name="driverId"
-                                value="<%= drivers.getInt("driver_id") %>">
-
-                            <button
-                                type="submit"
-                                class="select-btn"
-                                onclick="return confirm('Select this driver for your booking?');">
-
-                                Select Driver
-
-                            </button>
-
-                        </form>
-
-                    </td>
-
-                </tr>
-
-
-                <%
-
-                        }
-
-
-                        if (!hasDrivers) {
-
-                %>
-
-
-                <tr>
-
-                    <td colspan="8" class="empty">
-
-                        🚫 No registered drivers are currently available for
-                        <strong><%= vehicleType %></strong>.
-
-                    </td>
-
-                </tr>
-
-
-                <%
-
-                        }
-
-                    } else {
-
-                %>
-
-
-                <tr>
-
-                    <td colspan="8" class="empty">
-
-                        🚫 Unable to load available drivers.
-
-                    </td>
-
-                </tr>
-
-
-                <%
-
-                    }
-
-                %>
-
-            </table>
-
-
-            <a
-                class="back-btn"
-                href="<%= request.getContextPath() %>/customer/dashboard.jsp">
-
-                ← Back to Dashboard
-
-            </a>
 
         </div>
 
+
+        <div class="details">
+
+
+            <!-- DRIVER TYPE -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    Driver Type
+                </span>
+
+                <span class="detail-value">
+
+                    <%= driverType != null
+                        ? driverType
+                        : "Driver" %>
+
+                </span>
+
+            </div>
+
+
+            <!-- VEHICLE -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    Vehicle
+                </span>
+
+                <span class="detail-value">
+
+                    <%= activeVehicle != null
+                        ? activeVehicle
+                        : vehicleType %>
+
+                </span>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    Phone
+                </span>
+
+                <span class="detail-value">
+
+                    <%= phone %>
+
+                </span>
+
+            </div>
+
+
+            <!-- VEHICLE NUMBER -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    Vehicle Number
+                </span>
+
+                <span class="detail-value">
+
+                    <%= vehicleNumber != null
+                        ? vehicleNumber
+                        : "Not Available" %>
+
+                </span>
+
+            </div>
+
+
+            <!-- LICENSE -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    License Number
+                </span>
+
+                <span class="detail-value">
+
+                    <%= licenseNumber != null
+                        ? licenseNumber
+                        : "Not Available" %>
+
+                </span>
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="detail">
+
+                <span class="detail-label">
+                    Email
+                </span>
+
+                <span class="detail-value">
+
+                    <%= email != null
+                        ? email
+                        : "Not Available" %>
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ================= SELECT DRIVER ================= -->
+
+        <form
+            action="<%= request.getContextPath() %>/driver-booking/select"
+            method="post">
+
+
+            <input
+                type="hidden"
+                name="driverId"
+                value="<%= driverId %>">
+
+
+            <button
+                type="submit"
+                class="select-btn">
+
+                ✅ Select This Driver
+
+            </button>
+
+
+        </form>
+
+
     </div>
+
+
+<%
+    }
+
+
+    // ================= NO DRIVER =================
+
+    if (!found) {
+%>
+
+
+    <div class="empty">
+
+
+        <div class="empty-icon">
+            😔
+        </div>
+
+
+        <h2>
+            No Drivers Available
+        </h2>
+
+
+        <p>
+
+            Currently no driver is available
+            for <strong><%= vehicleType %></strong>.
+
+        </p>
+
+
+        <a
+            href="<%= request.getContextPath() %>/driver-booking/book.jsp"
+            class="back-btn">
+
+            ← Choose Another Vehicle
+
+        </a>
+
+
+    </div>
+
+
+<%
+    }
+%>
+
+
+</div>
+
 
 </body>
 

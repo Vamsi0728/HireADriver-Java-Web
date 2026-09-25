@@ -34,7 +34,7 @@ public class AdminLoginServlet extends HttpServlet {
 
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=admin"
+                + "/log/login-failed.jsp?type=admin"
             );
 
             return;
@@ -60,10 +60,10 @@ public class AdminLoginServlet extends HttpServlet {
 
         } else {
 
-            // Invalid login → Professional UI
+            // Invalid login
             response.sendRedirect(
                 request.getContextPath()
-                + "/login-failed.jsp?type=admin"
+                + "/log/login-failed.jsp?type=admin"
             );
         }
     }
